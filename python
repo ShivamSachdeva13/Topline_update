@@ -1,0 +1,335 @@
+import numpy as np # linear algebra
+import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+
+pip install openpyxl
+
+rtec_hyd_6oct_rtec = pd.read_csv("../input/rtec-hyd-6oct-rtec-new/RTEC_HYD_6OCT_RTEC_new.csv")
+bintix_topline_aug21 = pd.ExcelFile("../input/bintixtoplines-6cities-august21/BintixToplines_6cities_August21.xlsx")
+hyd = pd.read_excel(bintix_topline_aug21,'TOPLINE_JAN19-AUG 21_HYDER',index_col=0)
+
+level_1_2_order = {"HHs":-7,"%HH Penetration":-6,"Vol (000 Kg.s)":-5,"Average Consumption (Kg.s/HH)":-4,"Volume Share (As % of total RTEC vol.)":-3,"NOP":-2,"Average Number of Packs purchased per Household (NoP/HH)":-1}
+
+order_list =   ["MAT Jan’20",
+"MAT Jan’21" ,
+"MAT Feb’20",
+"MAT Feb’21" ,
+"MAT Mar’20"  ,
+"MAT Mar’21"  ,
+"MAT Apr’20" ,
+"MAT Apr’21" ,
+"MAT May 20" ,
+"MAT May 21" ,
+"MAT Jun’20" ,
+"MAT Jun’21" ,
+"MAT Jul’20"  ,
+"MAT Jul’21"  ,
+"MAT Aug’20"  ,
+"MAT Aug’21",
+"MAT SEP20",
+"MAT SEP21",
+"MAT OCT20",
+"MAT OCT21",
+"MAT NOV20",
+"MAT NOV21",
+"MAT DEC20",
+"MAT DEC21",
+"FH-19" ,
+"SH-19" ,
+"FH-20" ,
+"SH-20" ,
+"FH-21",
+"SH 21",
+"FH 22",
+"SH 22",
+"L3M Mar19",
+"L3M Apr19",
+"L3M May19",
+"L3M Jun19",
+"L3M Jul19",
+"L3M Aug19",
+"L3M Sep19",
+"L3M Oct19",
+"L3M Nov19",
+"L3M Dec19",
+"L3M Jan20",
+"L3M Feb20",
+"L3M Mar20",
+"L3M Apr20",
+"L3M May20",
+"L3M Jun20",
+"L3M Jul20",
+"L3M Aug20",
+"L3M Sep20" ,
+"L3M Oct20" ,
+"L3M Nov20" ,
+"L3M Dec20" ,
+"L3M JAN21",
+"L3M FEB21",
+"L3M MAR21",
+"L3M APR21",
+"L3M May21",
+"L3M Jun21",
+"L3M Jul21",
+"L3M Aug21",
+"L3M SEP21",
+"L3M OCT21",
+"L3M NOV21",
+"L3M DEC21"
+]
+i=0
+while i < len(order_list):
+    level_1_2_order[order_list[i]] = i
+    i+=1
+    
+#FILTERS FOR EACH ROW
+filter_for_each_row_rtec = {
+1: {"scat": "READY TO EAT CEREALS"},
+2: {"sscat": "FAMILY FLAKES"},
+3: {"sscat": "KIDS FLAKES"},
+4: {"sscat": "MUESLI & GRANOLA"},
+5: {"scat": "OATS & PORRIDGE"},
+6: {"brand": "KELLOGG'S"},
+7: {"sscat": "FAMILY FLAKES", "brand": "KELLOGG'S"},
+8: {"brand": "KELLOGG'S", "sub_brand": "CORN FLAKES"},
+9: {"brand": "KELLOGG'S", "sub_brand": "CORN FLAKES", "variant": "ORIGINAL"},
+10:{"brand": "KELLOGG'S", "sub_brand": "CORN FLAKES", "variant": "ORIGINAL", "std_unit_value": "temp.std_unit_value < 475"},
+11:{"brand": "KELLOGG'S", "sub_brand": "CORN FLAKES", "variant": "ORIGINAL" ,"std_unit_value": "temp.std_unit_value >= 475"},
+12:{"brand": "KELLOGG'S" ,"sub_brand" :"CORN FLAKES" ,"variant" :"REAL ALMOND & HONEY"} ,
+13:{"brand": "KELLOGG'S", "sub_brand": "CORN FLAKES", "variant" :"REAL ALMOND & HONEY", "std_unit_value": "temp.std_unit_value == 300"},
+14:{"brand" :"KELLOGG'S" ,"sub_brand" :"CORN FLAKES", "variant": "REAL ALMOND & HONEY", "std_unit_value": "temp.std_unit_value == 650"},
+15:{"brand" :"KELLOGG'S" ,"sub_brand" :"CORN FLAKES" ,"variant": "REAL ALMOND & HONEY", "std_unit_value": "temp.std_unit_value == 1000"},
+16:{"brand": "KELLOGG'S" ,"sub_brand" :"CORN FLAKES" ,"variant" :"REAL HONEY"},
+17:{"brand" :"KELLOGG'S" ,"sub_brand" :"CORN FLAKES" ,"variant" :"REAL STRAWBERRY"},
+18:{"brand" :"KELLOGG'S" ,"sub_brand" :"CORN FLAKES", "variant" :"REAL KESAR PISTA BADAM"},
+19:{"brand" :"KELLOGG'S", "sub_brand": "CORN FLAKES", "variant" :"REAL ROSE BADAM"},
+20:{"brand" :"KELLOGG'S", "sub_brand": "CORN FLAKES" ,"variant" :"REAL THANDAI BADAM"},
+21:{"brand": "KELLOGG'S" ,"sub_brand" :"ALL BRAN"},
+22:{"brand": "KELLOGG'S" ,"sub_brand" :"SPECIAL K"},
+23:{"brand" :"KELLOGG'S", "sub_brand" :"SPECIAL K", "variant" :"ORIGINAL"},
+24:{"brand" :"KELLOGG'S" ,"sub_brand": "SPECIAL K" ,"variant": "PROTEIN & FIBRE CRANBERRY FLAVOUR"},
+25:{"brand" :"KELLOGG'S", "sub_brand": "SPECIAL K", "variant" :"MULTIGRAIN OATS & HONEY"},
+26:{"brand" :"KELLOGG'S" ,"sscat": "KIDS FLAKES"},
+27:{"brand": "KELLOGG'S", "sub_brand" :"CHOCOS" },
+28:{"brand" :"KELLOGG'S", "sub_brand" :"CHOCOS", "std_unit_value": "temp.std_unit_value >= 700"},
+29:{"brand" :"KELLOGG'S" ,"sub_brand" :"CHOCOS", "variant" :"CHOCOS"},
+30:{"brand": "KELLOGG'S" ,"sub_brand" :"CHOCOS" ,"variant": "CHOCOS", "std_unit_value": "temp.std_unit_value < 700"},
+31:{"brand" :"KELLOGG'S" ,"sub_brand" :"CHOCOS", "variant" :"CHOCOS", "std_unit_value": "temp.std_unit_value >= 700"},
+32:{"brand": "KELLOGG'S" ,"sub_brand" :"CHOCOS", "variant" :"CHOCOS VARIETY PACK"},
+33:{"brand" :"KELLOGG'S", "sub_brand" :"CHOCOS", "variant" :"MOONS & STARS"},
+34:{"brand": "KELLOGG'S" ,"sub_brand" :"CHOCOS", "variant" :"MOONS & STARS", "std_unit_value": "temp.std_unit_value < 700"},
+35:{"brand": "KELLOGG'S" ,"sub_brand" :"CHOCOS" ,"variant" :"MOONS & STARS", "std_unit_value": "temp.std_unit_value >= 700"},
+36:{"brand" :"KELLOGG'S" ,"sub_brand" :"CHOCOS", "variant" :"CRUNCHY BITES"},
+37:{"brand" :"KELLOGG'S" ,"sub_brand" :"CHOCOS" ,"variant" :"DUET"},
+38:{"brand" :"KELLOGG'S" ,"sub_brand" :"CHOCOS" ,"attribute1" :"FRIENDS OF CHOCOS"}, #doubt
+39:{"brand" :"KELLOGG'S", "sub_brand" :"CHOCOS" ,"variant" :"WEBS"},
+40:{"brand" :"KELLOGG'S" ,"sub_brand" :"CHOCOS", "variant" :"CHHOTA LADDU"},
+41:{"brand" :"KELLOGG'S", "sub_brand": "CHOCOS" ,"variant" :"MAGIC HEARTS"},
+42:{"brand": "KELLOGG'S" ,"sub_brand" :"CHOCOS", "attribute2": "PREMIA"}, #doubt
+43:{"brand" :"KELLOGG'S", "sub_brand" :"CHOCOS" ,"variant": "FILLS"},
+44:{"brand": "KELLOGG'S" ,"sub_brand" :"CHOCOS" ,"variant": "RAGI CHOCOS"},
+45:{"brand": "KELLOGG'S" ,"sub_brand" :"FROOT LOOPS"},
+46:{"brand": "KELLOGG'S" ,"sub_brand" :"FROOT LOOPS INDIA"},
+47:{"brand" :"KELLOGG'S" ,"sscat": "MUESLI & GRANOLA"},
+48:{"brand" :"KELLOGG'S", "sub_brand": "MUESLI"},
+49:{"brand" :"KELLOGG'S", "sub_brand": "MUESLI" ,"std_unit_value": "temp.std_unit_value < 700"},
+50:{"brand" :"KELLOGG'S" ,"sub_brand": "MUESLI" ,"std_unit_value": "temp.std_unit_value >= 700"},
+51:{"brand" :"KELLOGG'S" ,"sub_brand" :"MUESLI", "variant": "FRUIT & NUT"},
+52:{"brand": "KELLOGG'S" ,"sub_brand" :"MUESLI" ,"variant" :"NUTS DELIGHT"},
+53:{"brand": "KELLOGG'S", "sub_brand" :"MUESLI", "variant": "FRUIT MAGIC"},
+54:{"brand": "KELLOGG'S", "sub_brand": "MUESLI" ,"variant": "NO ADDED SUGAR"},
+55:{"brand" :"KELLOGG'S" ,"sub_brand" :"CRUNCHY GRANOLA"},
+56:{"brand" :"KELLOGG'S" ,"sub_brand" :"CRUNCHY GRANOLA" ,"variant" :"ALMONDS & CRANBERRIES"},
+57:{"brand" :"KELLOGG'S" ,"sub_brand" :"CRUNCHY GRANOLA","variant" :"CHOCOLATE & ALMONDS"},
+58:{"brand":"KELLOGG'S", "sub_brand" :"CRUNCHY GRANOLA" ,"variant" :"HONEY, ALMONDS, STRAWBERRIES & PUMPKIN SEEDS"},
+59:{"brand": "KELLOGG'S" ,"sub_brand" :"OATS"},
+# 60:None
+61:{"sscat":"FAMILY FLAKES", "brand" :"BAGRRY'S"},
+62:{"sscat" :"FAMILY FLAKES" ,"brand": "HEALTH SUTRA"},
+63:{"sscat" :"FAMILY FLAKES", "brand": "HEALTH SUTRA" ,"variant": "BAJRA FLAKES"},
+64:{"sscat" :"FAMILY FLAKES", "brand" :"HEALTH SUTRA", "variant": "BARLEY FLAKES"},
+65:{"sscat": "FAMILY FLAKES" ,"brand": "HEALTH SUTRA" ,"variant": "RAGI FLAKES"},
+66:{"sscat" :"FAMILY FLAKES", "brand" :"HEALTH SUTRA", "variant" :"JOWAR FLAKES"},
+67:{"sscat": "FAMILY FLAKES" ,"brand" :"HEALTH SUTRA" ,"variant" :"YELLOW JOWAR FLAKES"},
+68:{"sscat" :"FAMILY FLAKES", "brand" :"MOHUN'S"},  #doubt
+69:{"sscat" :"FAMILY FLAKES" ,"brand": "KWALITY"},
+70:{"sscat" :"FAMILY FLAKES" ,"brand" :"BIG BASKET"},
+71:{"sscat": "FAMILY FLAKES" ,"brand" :"BIG BASKET" ,"sub_brand" :"MULTI MILLET FLAKES"},
+72:{"sscat" :"FAMILY FLAKES", "brand" :"BIG BASKET" ,"variant" :"FRUITS & NUTS"}, #doubt
+73:{"sscat": "FAMILY FLAKES" ,"brand": "HEALTHY LIFE"}, 
+74:{"sscat": "FAMILY FLAKES" ,"brand" :"LAWRENCE MILLS"},  #doubt
+75:{"sscat" :"FAMILY FLAKES" ,"brand": "MONSOON HARVEST"}, #doubt
+76:{"sscat" :"FAMILY FLAKES", "brand": "MONSOON HARVEST" ,"sub_brand" :"CINNAMON OAT CLUSTERS & MULTIGRAIN FLAKES" ,"variant": "APPLE"},
+77:{"sscat" :"FAMILY FLAKES", "brand" :"MONSOON HARVEST", "sub_brand" :"OAT CLUSTERS & RAGI FLAKES" ,"variant" :"STRAWBERRY"},
+78:{"sscat": "FAMILY FLAKES" ,"brand" :"NESPLUS"},
+79:{"sscat": "FAMILY FLAKES" ,"brand" : "NESPLUS" ,"sub_brand": "CRUNCHY FLAKES"},
+80:{"sscat": "FAMILY FLAKES" ,"brand" : "PATANJALI"},
+81:{"sscat": "FAMILY FLAKES" ,"brand" : "SOLIMO"}, #doubt
+82:{"sscat": "FAMILY FLAKES" ,"brand" : "TASTY TREAT"}, #doubt
+# 83:None
+84:{"sscat": "KIDS FLAKES" ,"brand": "BOURNVITA"}, #doubt
+85:{"sscat": "KIDS FLAKES" ,"brand": "CINNAMON TOAST CRUNCH"},
+86:{"sscat": "KIDS FLAKES" ,"brand": "GENERAL MILLS"},
+87:{"sscat": "KIDS FLAKES" ,"brand": "GENERAL MILLS", "sub_brand" :"CHEERIOS" },
+88:{"sscat": "KIDS FLAKES" ,"brand": "GENERAL MILLS" ,"sub_brand" :"CHEERIOS" ,"variant": "CHOCOLATE"},
+89:{"sscat": "KIDS FLAKES" ,"brand": "GENERAL MILLS" ,"sub_brand" :"CHEERIOS" ,"variant": "FRUITY"},
+90:{"sscat": "KIDS FLAKES" ,"brand": "GENERAL MILLS" ,"sub_brand" :"CHEERIOS" ,"variant" :"HONEY NUT"},
+91:{"sscat": "KIDS FLAKES" ,"brand": "GENERAL MILLS" ,"sub_brand" :"CHEERIOS" ,"variant" :"MULTI GRAIN"},
+92:{"sscat": "KIDS FLAKES" ,"brand": "GENERAL MILLS" ,"sub_brand" :"CHEERIOS" ,"variant":  "NATURALLY FLAVORED HONEY NUT CHEERIOS"}, #doubt
+93:{"sscat": "KIDS FLAKES" ,"brand": "GENERAL MILLS" ,"sub_brand" :"CHEERIOS" ,"variant": "TOASTED WHOLE GRAIN OAT CEREAL"},
+94:{"sscat": "KIDS FLAKES" ,"brand": "GENERAL MILLS" ,"sub_brand" :"CHEERIOS" ,"variant": "WHOLE GRAIN OATS"},  #doubt
+95:{"sscat": "KIDS FLAKES" ,"brand": "GENERAL MILLS" ,"sub_brand" :"CHEERIOS" ,"variant": "CHEERIOS OATS" },#doubt
+96:{"sscat": "KIDS FLAKES" ,"brand": "GENERAL MILLS" ,"sub_brand" :"CHEERIOS" ,"variant": "APPLE CINNAMON"},
+97:{"sscat": "KIDS FLAKES" ,"brand": "KWALITY" ,"sub_brand" :"CHOCO FLAKES"},
+98:{"sscat": "KIDS FLAKES" ,"brand": "NESTLE"},
+99:{"sscat": "KIDS FLAKES" ,"brand": "NESTLE", "sub_brand": "KOKO KRUNCH"},
+100:{"sscat": "KIDS FLAKES" ,"brand": "NESTLE" ,"sub_brand": "MULTIGRAIN FILLOWS"},
+101:{"sscat": "KIDS FLAKES" ,"brand": "NUTRI DELITE", "sub_brand" :"CHOCO FLAKES"},
+102:{"sscat": "KIDS FLAKES" ,"brand": "PATANJALI"},
+103:{"sscat": "KIDS FLAKES" ,"brand": "POST"},
+104:{"sscat": "KIDS FLAKES" ,"brand": "SOULFULL"},
+105:{"sscat": "KIDS FLAKES" ,"brand": "SOULFULL" ,"sub_brand" :"RAGI BITES"},
+106:{"sscat": "KIDS FLAKES" ,"brand": "SOULFULL" ,"variant" :"CHOCO FILLS"},
+107:{"sscat": "KIDS FLAKES" ,"brand": "SOULFULL" ,"variant" :"STRAWBERRY FILLS"},
+108:{"sscat": "KIDS FLAKES" ,"brand": "SOULFULL" ,"variant" :"VANILLA FILLS"},
+109:{"sscat": "KIDS FLAKES" ,"brand": "SOULFULL" ,"variant" :"VARIETY PACK"},
+110:{"sscat": "KIDS FLAKES" ,"brand": "SOULFULL" ,"sub_brand": "MULTI GRAIN LOOPIES"},
+111:{"sscat": "KIDS FLAKES" ,"brand": "SOULFULL" ,"variant" :"CHOCOLATE"},
+112:{"sscat": "KIDS FLAKES" ,"brand": "SOULFULL" ,"variant" :"CHOCO POCO"},
+# 113:None
+114:{"sscat" :"MUESLI & GRANOLA", "brand": "BAGRRY'S"},
+115:{"sscat" :"MUESLI & GRANOLA", "brand": "YOGA BAR"},
+116:{"sscat" :"MUESLI & GRANOLA", "brand": "SOULFULL"},
+117:{"sscat" :"MUESLI & GRANOLA", "brand": "GAIA"},
+118:{"sscat" :"MUESLI & GRANOLA", "brand": "NESPLUS", "sub_brand" :"CRUNCHY GRANOLA"} ,
+119:{"sscat" :"MUESLI & GRANOLA", "brand": "MONSOON HARVEST"},
+120:{"sscat" :"MUESLI & GRANOLA", "brand": "PRISTINE BEGINNINGS" ,"variant": "ORGANIC MILLET MUESLI"},
+121:{"sscat" :"MUESLI & GRANOLA", "brand": "TRUE ELEMENTS" },
+122:{"sscat" :"MUESLI & GRANOLA", "brand": "GOODDIET"},
+123:{"sscat" :"MUESLI & GRANOLA", "brand": "BB ROYAL"},
+124:{"sscat" :"MUESLI & GRANOLA", "brand": "COCOSUTRA", "variant": "PEANUT BUTTER CHOCOLATE CHUNK"},
+125:{"sscat" :"MUESLI & GRANOLA", "brand": "EXPRESS FOODS"},
+126:{"sscat" :"MUESLI & GRANOLA", "brand": "FABSTA"},
+127:{"sscat" :"MUESLI & GRANOLA", "brand": "KWALITY"},
+# 128: None
+129:{"sscat" :"OATS & PORRIDGE", "brand" :"QUAKER"},
+130:{"sscat" :"OATS & PORRIDGE" ,"brand" :"SAFFOLA"},
+131:{"sscat": "OATS & PORRIDGE" ,"brand" :"BAGRRY'S"},
+132:{"sscat" :"OATS & PORRIDGE" ,"brand" :"BY NATURE"},
+133:{"sscat" :"OATS & PORRIDGE" ,"brand" :"ECO VALLEY"},
+134:{"sscat": "OATS & PORRIDGE" ,"brand" :"FABSTA"},
+135:{"sscat" :"OATS & PORRIDGE" ,"brand": "GAIA"},
+136:{"sscat" :"OATS & PORRIDGE" ,"brand": "HORLICKS"},
+137:{"sscat" :"OATS & PORRIDGE" ,"brand" :"PATANJALI"},
+138:{"sscat" :"OATS & PORRIDGE" ,"brand" :"TRUE ELEMENTS"},
+139:{"sscat" :"OATS & PORRIDGE" ,"brand" :"URBAN PLATTER"}
+    }
+    
+month_num_dict = {
+"JAN":1,
+"FEB":2,
+"MAR":3,
+"APR":4,
+"MAY":5,
+"JUN":6,
+"JUL":7,
+"AUG":8,
+"SEP":9,
+"OCT":10,
+"NOV":11,
+"DEC":12}
+
+
+metric_formula_dict = {
+                       "HHs":"len(temp.bintix_uid.unique())*factor_time", #need changes
+                       "%HH Penetration":"len(temp.bintix_uid.unique())*factor_time/topline_prev_month['HHs',t].iloc[0]",#need changes
+                       "Vol (000 Kg.s)":"(temp.volume.sum()/1000000)*factor_time",#need changes
+                       "Average Consumption (Kg.s/HH)":"temp.volume.sum()/(1000*len(temp.bintix_uid.unique()))",
+                       "Volume Share (As % of total RTEC vol.)":"temp.volume.sum()/temp_time.loc[temp_time.scat=='READY TO EAT CEREALS'].volume.sum()",
+                       "NOP":"temp.quantity_pack.sum()*factor_time",#need changes
+                       "Average Number of Packs purchased per Household (NoP/HH)":"temp.quantity_pack.sum()/len(temp.bintix_uid.unique())"#need changes
+                      }
+                      
+def topline_update_rtec_hyd(topline_prev_month,rtec_data,new_month,year): #new_month eg: "JUN" , year eg: 21
+    
+    #Changing format of the dataframe
+    column_group_number = int((topline_prev_month.shape[1]) / 7)
+    columns_level1_unique = {"HHs":1,"%HH Penetration":2,"Vol (000 Kg.s)":3,"Average Consumption (Kg.s/HH)":4,"Volume Share (As % of total RTEC vol.)":5,"NOP":6,"Average Number of Packs purchased per Household (NoP/HH)":7}
+    columns_level1 = list(columns_level1_unique.keys())*column_group_number
+    columns_level1_sorted = sorted(columns_level1,key=lambda x:columns_level1_unique[x])
+    topline_prev_month = topline_prev_month.transpose()
+    topline_prev_month.reset_index(drop=True,inplace=True)
+    topline_prev_month.insert(loc=0,column="",value=columns_level1_sorted)
+    topline_prev_month.rename(columns={ topline_prev_month.columns[0]: "metric",topline_prev_month.columns[1]: "time_period" }, inplace = True)
+    topline_prev_month = topline_prev_month.set_index(list(topline_prev_month.columns[[0,1]])).transpose()
+    
+    #Adding new columns (empty)
+    for a in columns_level1_unique:
+        topline_prev_month[a,"L3M "+ new_month + str(year)] = ["" for x in range(140)]
+        topline_prev_month[a,"MAT "+ new_month + str(year-1)] = ["" for x in range(140)]
+        topline_prev_month[a,"MAT "+ new_month + str(year)] = ["" for x in range(140)]
+        if new_month == "JUN":
+            topline_prev_month[a,"FH " + str(year)] = ["" for x in range(140)]
+        if new_month == "DEC":
+            topline_prev_month[a,"SH " + str(year)] = ["" for x in range(140)]
+    
+    #new month number formula
+    new_month_number_bintix_convention = (year-19)*12+ month_num_dict[new_month]
+    
+    #creating dict for time period (rectify a possible issue later as multple MAT columns can have same name)
+    month_number_to_include = {
+        "L3M "+ new_month + str(year): list(range(new_month_number_bintix_convention-2,new_month_number_bintix_convention+1)),
+        "MAT "+ new_month + str(year-1): list(range(new_month_number_bintix_convention-24,new_month_number_bintix_convention-11)),
+        "MAT "+ new_month + str(year): list(range(new_month_number_bintix_convention-12,new_month_number_bintix_convention+1)),
+        # will give correct FH SH for JUN DEC
+        "FH " + str(year):list(range(new_month_number_bintix_convention-6,new_month_number_bintix_convention+1)),
+        "SH " + str(year):list(range(new_month_number_bintix_convention-6,new_month_number_bintix_convention+1))
+        }
+    
+    # new_columns_time is a list of newly added time_periods
+    new_columns_time = list(month_number_to_include.keys())[:3]
+    if new_month == "JUN":
+            new_columns_time+=list(month_number_to_include.keys())[3]
+    if new_month == "DEC":
+            new_columns_time+=list(month_number_to_include.keys())[4]
+            
+    #Filling NCCS-A HH
+    for t in new_columns_time:
+        topline_prev_month["HHs",t].iloc[0]=rtec_data.loc[rtec_data.month.isin(month_number_to_include[t])].groupby("month").tghh.first().mean()
+    
+    factor_of_the_month = dict()
+    for a in rtec_data.month.unique():
+        factor_of_the_month[a] = rtec_data.loc[rtec_data.month==a].projectedfactor_monthlyv1.iloc[0]
+    #Filling epmty columns
+    for t in new_columns_time:
+        factor_time = rtec_data.loc[rtec_data.month.isin(month_number_to_include[t])].groupby("month").projectedfactor_monthlyv1.first().mean()
+        temp_time=rtec_data.loc[rtec_data.month.isin(month_number_to_include[t])]
+        for r in list(filter_for_each_row_rtec.keys()):                
+            temp=temp_time
+            for f in filter_for_each_row_rtec[r]:
+                if f != "std_unit_value":
+                    temp = temp.loc[temp[f]==filter_for_each_row_rtec[r][f]]
+                else:
+                    temp = temp.loc[eval(filter_for_each_row_rtec[r][f])]
+            for m in columns_level1_unique:
+                topline_prev_month[m,t].iloc[r]= eval(metric_formula_dict[m])
+#                 if m=="HHs":
+#                     unique_household=0
+#                     for a in month_number_to_include[t]:
+#                         temp_further = temp.loc[temp.month==a]
+#                         unique_household+=len(temp_further.bintix_uid.unique())*factor_of_the_month[a]
+#                     topline_prev_month[m,t].iloc[r]=unique_household/len(month_number_to_include[t])
+#                 else:    
+#                     topline_prev_month[m,t].iloc[r]= eval(metric_formula_dict[m])
+                
+    #Arranging columns
+    topline_prev_month.sort_index(axis=1,level=[0,1],key = lambda x: [ level_1_2_order[a] for a in x],inplace=True  )
+    
+    #Generating output
+    with pd.ExcelWriter('BintixToplines_'+ new_month + "_"+ str(year)+ '.xlsx') as writer:  # doctest: +SKIP
+        topline_prev_month.to_excel(writer, sheet_name='TOPLINE_JAN19-' + new_month + "_"+ str(year)+ '_HYDER')
+    
+        
+    return 
+        
+topline_update_rtec_hyd(hyd,rtec_hyd_6oct_rtec,"SEP",21)
+   
