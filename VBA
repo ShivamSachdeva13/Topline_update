@@ -1,0 +1,254 @@
+Sub RTECformatting()
+'
+' Macro5 Macro
+'
+
+' changing format of all numbers
+
+    Dim HH As Range
+
+    Set HH = Cells.Find(What:="HHs", LookIn:=xlFormulas, LookAt _
+        :=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
+        False, SearchFormat:=False)
+        
+    Dim Pen As Range
+
+    Set Pen = Cells.Find(What:="%HH Penetration", LookIn:=xlFormulas, LookAt _
+        :=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
+        False, SearchFormat:=False)
+        
+    Dim Vol As Range
+
+    Set Vol = Cells.Find(What:="Vol (000 Kg.s)", LookIn:=xlFormulas, LookAt _
+        :=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
+        False, SearchFormat:=False)
+        
+    Dim Acon As Range
+
+    Set Acon = Cells.Find(What:="Average Consumption (Kg.s/HH)", LookIn:=xlFormulas, LookAt _
+        :=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
+        False, SearchFormat:=False)
+        
+    Dim Vols As Range
+
+    Set Vols = Cells.Find(What:="Volume Share (As % of total RTEC vol.)", LookIn:=xlFormulas, LookAt _
+        :=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
+        False, SearchFormat:=False)
+        
+    Dim Nop As Range
+
+    Set Nop = Cells.Find(What:="NOP", LookIn:=xlFormulas, LookAt _
+        :=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
+        False, SearchFormat:=False)
+        
+    Dim Anop As Range
+
+    Set Anop = Cells.Find(What:="Average Number of Packs purchased per Household (NoP/HH)", LookIn:=xlFormulas, LookAt _
+        :=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:= _
+        False, SearchFormat:=False)
+    
+
+     
+     Range(HH.Address).EntireColumn.Select
+     Selection.NumberFormat = "#,##0"
+     
+     Range(Pen.Address).EntireColumn.Select
+     Selection.Style = "Percent"
+     Selection.NumberFormat = "0.0%"
+     
+     Range(Vol.Address).EntireColumn.Select
+     Selection.NumberFormat = "0"
+     
+     Range(Acon.Address).EntireColumn.Select
+     Selection.NumberFormat = "0.000"
+     
+     Range(Vols.Address).EntireColumn.Select
+     Selection.NumberFormat = "0.0%"
+     
+     Range(Nop.Address).EntireColumn.Select
+     Selection.NumberFormat = "#,##0"
+     
+     Range(Anop.Address).EntireColumn.Select
+     Selection.NumberFormat = "0.0"
+     
+' filling colours in specific rows
+
+    Rows("1:1").Select
+    With Selection.Interior
+        .Pattern = xlSolid
+        .PatternColorIndex = xlAutomatic
+        .ThemeColor = xlThemeColorDark1
+        .TintAndShade = -0.349986266670736
+        .PatternTintAndShade = 0
+    End With
+    Rows("2:2").Select
+    With Selection.Interior
+        .Pattern = xlSolid
+        .PatternColorIndex = xlAutomatic
+        .ThemeColor = xlThemeColorLight2
+        .TintAndShade = 0.799981688894314
+        .PatternTintAndShade = 0
+    End With
+    Rows("3:3").Select
+    Selection.Delete Shift:=xlUp
+    Rows("3:3").Select
+    With Selection.Interior
+        .Pattern = xlSolid
+        .PatternColorIndex = xlAutomatic
+        .ThemeColor = xlThemeColorLight2
+        .TintAndShade = 0.599993896298105
+        .PatternTintAndShade = 0
+    End With
+    Range("9:10,29:29,50:50,62:63,86:86,116:116,131:131").Select
+    With Selection.Interior
+        .Pattern = xlSolid
+        .PatternColorIndex = xlAutomatic
+        .ThemeColor = xlThemeColorAccent6
+        .TintAndShade = 0.599993896298105
+        .PatternTintAndShade = 0
+    End With
+    
+'Numbers alignment
+
+    Cells.Select
+    With Selection
+        .HorizontalAlignment = xlRight
+        .VerticalAlignment = xlCenter
+        .WrapText = False
+        .Orientation = 0
+        .AddIndent = False
+        .IndentLevel = 0
+        .ShrinkToFit = False
+        .ReadingOrder = xlContext
+        '.MergeCells = False
+    End With
+' Freezing panes
+
+    Range("B3").Select
+    ActiveWindow.FreezePanes = True
+    
+' Formatting row labels
+
+    Columns("A:A").Select
+ 
+    With Selection
+        .HorizontalAlignment = xlLeft
+        .VerticalAlignment = xlCenter
+        .WrapText = False
+        .Orientation = 0
+        .AddIndent = False
+        .IndentLevel = 0
+        .ShrinkToFit = False
+        .ReadingOrder = xlContext
+        .MergeCells = False
+    End With
+    
+    Cells.ColumnWidth = 15
+    Columns("A:A").ColumnWidth = 40.44
+    'Columns("B:ZZ").ColumnWidth = 15
+    
+    Range("A12:A23,A26:A28,A32:A47,A54:A57,A59:A61,A66:A70,A91:A99,A108:A115").Select
+    With Selection
+        .HorizontalAlignment = xlRight
+        .VerticalAlignment = xlCenter
+        .WrapText = False
+        .Orientation = 0
+        .AddIndent = False
+        .IndentLevel = 0
+        .ShrinkToFit = False
+        .ReadingOrder = xlContext
+        .MergeCells = False
+    End With
+    Selection.Font.Bold = False
+    
+    Range("A48:A49,A74:A75,A79:A80,A82,A90,A102:A103").Select
+    Selection.Font.Bold = False
+    
+'Column Label alignment
+    
+    Range("1:1,2:2").Select
+    With Selection
+        .HorizontalAlignment = xlCenter
+        .VerticalAlignment = xlCenter
+        .WrapText = False
+        .Orientation = 0
+        .AddIndent = False
+        .IndentLevel = 0
+        .ShrinkToFit = False
+        .ReadingOrder = xlContext
+    End With
+    
+
+
+'Row height
+    Cells.Select
+    Selection.RowHeight = 21
+    Rows("1:1").RowHeight = 32
+    Rows("2:2").RowHeight = 32
+    
+    
+'Deleting metric,time_period
+    
+    Range("A1").Select
+    ActiveCell.FormulaR1C1 = ""
+    Range("A2").Select
+    ActiveCell.FormulaR1C1 = ""
+    Range("A1:A2").Select
+    With Selection.Interior
+        .Pattern = xlSolid
+        .PatternColorIndex = xlAutomatic
+        .ThemeColor = xlThemeColorDark1
+        .TintAndShade = 0
+        .PatternTintAndShade = 0
+    End With
+
+'All borders
+
+    Cells.Select
+    Selection.Borders(xlDiagonalDown).LineStyle = xlNone
+    Selection.Borders(xlDiagonalUp).LineStyle = xlNone
+    With Selection.Borders(xlEdgeLeft)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    With Selection.Borders(xlEdgeTop)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    With Selection.Borders(xlEdgeBottom)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    With Selection.Borders(xlEdgeRight)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    With Selection.Borders(xlInsideVertical)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    With Selection.Borders(xlInsideHorizontal)
+        .LineStyle = xlContinuous
+        .ColorIndex = 0
+        .TintAndShade = 0
+        .Weight = xlThin
+    End With
+    
+'Last step
+
+   Range("A1").Select
+   
+End Sub
+
+
+
