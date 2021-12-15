@@ -1,7 +1,7 @@
 import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 
-pip install openpyxl
+#pip install openpyxl
 
 rtec_hyd_6oct_rtec = pd.read_csv("../input/rtec-hyd-6oct-rtec-new/RTEC_HYD_6OCT_RTEC_new.csv")
 bintix_topline_aug21 = pd.ExcelFile("../input/bintixtoplines-6cities-august21/BintixToplines_6cities_August21.xlsx")
